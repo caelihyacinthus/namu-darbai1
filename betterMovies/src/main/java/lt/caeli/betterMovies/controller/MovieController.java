@@ -3,7 +3,6 @@ package lt.caeli.betterMovies.controller;
 import lt.caeli.betterMovies.model.Movie;
 import lt.caeli.betterMovies.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -35,10 +34,13 @@ public class MovieController {
   @PostMapping("/movies")
   public ResponseEntity<?> saveMovie(@RequestBody Movie movie) {
     if (movie.getTitle().isBlank() || movie.getTitle().isEmpty()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("movie title empty");
+      return ResponseEntity.badRequest().body("movie title empty");
     }
     if (movie.getDirector().isBlank() || movie.getDirector().isEmpty()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("movie director empty");
+      return ResponseEntity.badRequest().body("movie director empty");
+    }
+    if (movieService.existsMovieByTitle(movie.getTitle()) && movieService.existsMovieByDirector(movie.getDirector())) {
+      return ResponseEntity.badRequest().body("movie already exists");
     }
 
     Movie movieSaved = movieService.saveMovie(movie);
@@ -51,10 +53,13 @@ public class MovieController {
   @PutMapping("/movies/{id}")
   public ResponseEntity<?> updateMovie(@PathVariable long id, @RequestBody Movie movie) {
     if (movie.getTitle().isBlank() || movie.getTitle().isEmpty()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("movie title empty");
+      return ResponseEntity.badRequest().body("movie title empty");
     }
     if (movie.getDirector().isBlank() || movie.getDirector().isEmpty()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("movie director empty");
+      return ResponseEntity.badRequest().body("movie director empty");
+    }
+    if (movieService.existsMovieByTitle(movie.getTitle()) && movieService.existsMovieByDirector(movie.getDirector())) {
+      return ResponseEntity.badRequest().body("movie already exists with such director and title");
     }
 
     if (movieService.existsMovieById(id)) {
@@ -84,5 +89,3 @@ public class MovieController {
     }
   }
 }
-/*
- * */
