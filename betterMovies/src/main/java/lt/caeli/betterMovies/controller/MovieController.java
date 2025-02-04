@@ -58,7 +58,8 @@ public class MovieController {
     if (movie.getDirector().isBlank() || movie.getDirector().isEmpty()) {
       return ResponseEntity.badRequest().body("movie director empty");
     }
-    if (movieService.existsMovieByTitle(movie.getTitle()) && movieService.existsMovieByDirector(movie.getDirector())) {
+
+    if (movieService.existsMovieByTitleAndDirector(movie.getTitle(), movie.getDirector())) {
       return ResponseEntity.badRequest().body("movie already exists with such director and title");
     }
 
