@@ -15,6 +15,21 @@ public class Movie {
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "movie_id")
   private List<Screening> screenings;
+  @ManyToMany
+  @JoinTable(
+          name = "movies_actors",
+          joinColumns = @JoinColumn(name = "movie_id"),
+          inverseJoinColumns = @JoinColumn(name = "actor_id")
+  )
+  private List<Actor> actors;
+
+  public List<Actor> getActors() {
+    return actors;
+  }
+
+  public void setActors(List<Actor> actors) {
+    this.actors = actors;
+  }
 
   public Movie() {
   }

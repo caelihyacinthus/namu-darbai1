@@ -65,6 +65,7 @@ public class MovieController {
       movieOld.setDirector(movie.getDirector());
       movieOld.setTitle(movie.getTitle());
       movieOld.setScreenings(movie.getScreenings());
+      movieOld.setActors(movie.getActors());
 
       return ResponseEntity.ok(movieService.saveMovie(movieOld));
     } else {
