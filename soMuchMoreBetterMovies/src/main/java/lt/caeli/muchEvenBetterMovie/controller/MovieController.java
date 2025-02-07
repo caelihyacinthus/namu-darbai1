@@ -1,6 +1,8 @@
 package lt.caeli.muchEvenBetterMovie.controller;
 
 import jakarta.validation.Valid;
+import lt.caeli.muchEvenBetterMovie.dto.MovieDTO;
+import lt.caeli.muchEvenBetterMovie.dto.MovieMapper;
 import lt.caeli.muchEvenBetterMovie.model.Movie;
 import lt.caeli.muchEvenBetterMovie.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,55 +27,52 @@ public class MovieController {
   }
 
   @GetMapping("/movies")
-  public ResponseEntity<List<Movie>> getMovies() {
-    return ResponseEntity.ok(movieService.findAllMovies());
+  public ResponseEntity<List<MovieDTO>> getMovies() {
+    return ResponseEntity.ok(MovieMapper.toMovieDTOList(movieService.findAllMovies()));
   }
 
   @GetMapping("/movies/{id}")
-  public ResponseEntity<Movie> getMovie(@PathVariable long id) {
+  public ResponseEntity<MovieDTO> getMovie(@PathVariable long id) {
     Optional<Movie> movieOptional = movieService.findMovieById(id);
-    return movieOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    return movieOptional.map(movie -> ResponseEntity.ok(MovieMapper.toMovieDTO(movie))).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @PostMapping("/movies")
-  public ResponseEntity<?> saveMovie(@Valid @RequestBody Movie movie) {
-    if (movieService.existsMovieByTitleAndDirector(movie.getTitle(), movie.getDirector())) {
+  public ResponseEntity<?> saveMovie(@Valid @RequestBody MovieDTO movieDTO) {
+    if (movieService.existsMovieByTitleAndDirector(movieDTO.title(), movieDTO.director())) {
       Map<String, String> badResponse = new HashMap<>();
       badResponse.put("error", "movie already exists with such director and title");
       return ResponseEntity.badRequest().body(badResponse);
     }
 
-    Movie movieSaved = movieService.saveMovie(movie);
+    Movie movieSaved = movieService.saveMovie(MovieMapper.toMovie(movieDTO));
     return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                     .buildAndExpand(movieSaved.getId())
                     .toUri())
-            .body(movieSaved);
+            .body(MovieMapper.toMovieDTO(movieSaved));
   }
 
   @PutMapping("/movies/{id}")
-  public ResponseEntity<?> updateMovie(@PathVariable long id, @Valid @RequestBody Movie movie) {
+  public ResponseEntity<?> updateMovie(@PathVariable long id, @Valid @RequestBody MovieDTO movieDTO) {
     if (movieService.existsMovieById(id)) {
       Movie movieOld = movieService.findMovieById(id).get();
 
-      movieOld.setDirector(movie.getDirector());
-      movieOld.setTitle(movie.getTitle());
-      movieOld.setScreenings(movie.getScreenings());
-      movieOld.setActors(movie.getActors());
+      MovieMapper.updateMovieWithMovieDTO(movieOld, movieDTO);
 
       return ResponseEntity.ok(movieService.saveMovie(movieOld));
     } else {
-      if (movieService.existsMovieByTitleAndDirector(movie.getTitle(), movie.getDirector())) {
+      if (movieService.existsMovieByTitleAndDirector(movieDTO.title(), movieDTO.director())) {
         Map<String, String> badResponse = new HashMap<>();
         badResponse.put("error", "movie already exists with such director and title");
         return ResponseEntity.badRequest().body(badResponse);
       }
 
-      Movie movieNew = movieService.saveMovie(movie);
+      Movie movieNew = movieService.saveMovie(MovieMapper.toMovie(movieDTO));
 
       return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().replacePath("movie/{id}")
                       .buildAndExpand(movieNew.getId())
                       .toUri())
-              .body(movieNew);
+              .body(MovieMapper.toMovieDTO(movieNew));
     }
   }
 

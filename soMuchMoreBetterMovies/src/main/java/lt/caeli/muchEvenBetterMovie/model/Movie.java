@@ -13,9 +13,9 @@ public class Movie {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @Size(min = 3, max = 100, message = "must be between 3 and 100")
+  //  @Size(min = 3, max = 100, message = "must be between 3 and 100")
   private String title;
-  @Pattern(regexp = "[A-Z][A-Za-z| ]+", message = "must start with with capital letter")
+  //  @Pattern(regexp = "[A-Z][A-Za-z| ]+", message = "must start with with capital letter")
   private String director;
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "movie_id")
