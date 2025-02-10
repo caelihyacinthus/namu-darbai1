@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 public class UserController {
   private final PasswordEncoder passwordEncoder;
-  private UserService userService;
+  private final UserService userService;
 
   @Autowired
   public UserController(UserService userService, PasswordEncoder passwordEncoder) {
@@ -29,6 +30,13 @@ public class UserController {
   @GetMapping("/users")
   public ResponseEntity<List<UserRequestDTO>> getUsers() {
     return ResponseEntity.ok(UserMapper.toUserDTOList(userService.findAllUsers()));
+  }
+
+  @GetMapping("/users/{id}")
+  public ResponseEntity<UserRequestDTO> getUserById(@PathVariable long id) {
+    Optional<User> user = userService.findUserById(id);
+    return user.map(u -> ResponseEntity.ok(UserMapper.toUserDTO(u))).orElseGet(() -> ResponseEntity.notFound().build());
+
   }
 
   @PostMapping("/users")
@@ -45,5 +53,29 @@ public class UserController {
                     .buildAndExpand(userSaved.id())
                     .toUri())
             .body(userSaved);
+  }
+
+  @PutMapping("/users/{id}")
+  public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserPostDTO userPostDTO) {
+    if (userService.existsUserById(id)) {
+      User user = userService.findUserById(id).get();
+      user.setUsername(userPostDTO.username());
+      user.setPassword(passwordEncoder.encode(userPostDTO.password()));
+      user.setRoles(userPostDTO.roles());
+      return ResponseEntity.ok(UserMapper.toUserDTO(userService.saveUser(user)));
+    } else {
+      User user = new User(userPostDTO.username(), userPostDTO.password(), userPostDTO.roles());
+      return ResponseEntity.ok(UserMapper.toUserDTO(userService.saveUser(user)));
+    }
+  }
+
+  @DeleteMapping("/users/{id}")
+  public ResponseEntity<Void> deleteUser(@PathVariable long id) {
+    if (userService.existsUserById(id)) {
+      userService.deleteUserById(id);
+      return ResponseEntity.noContent().build();
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 }

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
 
   @Autowired
   public UserService(UserRepository userRepository) {
@@ -27,5 +27,17 @@ public class UserService {
 
   public Optional<User> findUserByUsername(String username) {
     return userRepository.findByUsername(username);
+  }
+
+  public Optional<User> findUserById(long id) {
+    return userRepository.findById(id);
+  }
+
+  public boolean existsUserById(long id) {
+    return userRepository.existsById(id);
+  }
+
+  public void deleteUserById(long id) {
+    userRepository.deleteById(id);
   }
 }

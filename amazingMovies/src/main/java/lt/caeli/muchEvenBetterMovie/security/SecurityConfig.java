@@ -24,8 +24,13 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/movies").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/movies/{id}").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/movies/{id}").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.GET, "/api/movies").hasRole("USER")
                     .requestMatchers(HttpMethod.GET, "/api/movies/{id}").hasRole("USER")
+                    .requestMatchers(HttpMethod.GET, "/api/movies/pagination").hasRole("USER")
+                    .requestMatchers(HttpMethod.GET, "/api/movies/search").hasRole("USER")
                     .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                     .anyRequest().authenticated()
             );

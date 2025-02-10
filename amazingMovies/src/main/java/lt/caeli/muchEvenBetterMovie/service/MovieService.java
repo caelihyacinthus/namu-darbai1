@@ -63,4 +63,8 @@ public class MovieService {
     Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
     return movieRepository.findAll(pageable);
   }
+
+  public List<Movie> findAllMoviesContaining(String title) {
+    return movieRepository.findAllByTitleContaining(title);
+  }
 }

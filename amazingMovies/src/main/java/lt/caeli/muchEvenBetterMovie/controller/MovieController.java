@@ -1,6 +1,7 @@
 package lt.caeli.muchEvenBetterMovie.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lt.caeli.muchEvenBetterMovie.dto.MovieDTO;
 import lt.caeli.muchEvenBetterMovie.dto.MovieMapper;
 import lt.caeli.muchEvenBetterMovie.model.Movie;
@@ -19,7 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class MovieController {
-  private MovieService movieService;
+  private final MovieService movieService;
 
   @Autowired
   public MovieController(MovieService movieService) {
@@ -59,7 +60,7 @@ public class MovieController {
 
       MovieMapper.updateMovieWithMovieDTO(movieOld, movieDTO);
 
-      return ResponseEntity.ok(movieService.saveMovie(movieOld));
+      return ResponseEntity.ok(MovieMapper.toMovieDTO(movieService.saveMovie(movieOld)));
     } else {
       if (movieService.existsMovieByTitleAndDirector(movieDTO.title(), movieDTO.director())) {
         Map<String, String> badResponse = new HashMap<>();
@@ -86,10 +87,16 @@ public class MovieController {
     }
   }
 
-  @GetMapping("movies/pagination")
+  @GetMapping("/movies/pagination")
   public ResponseEntity<Page<Movie>> getMoviePage(@RequestParam int page,
                                                   @RequestParam int size,
                                                   @RequestParam(required = false) String sort) {
     return ResponseEntity.ok(movieService.findAllMoviesPage(page, size, sort));
+  }
+
+  @GetMapping("/movies/search")
+  public ResponseEntity<List<MovieDTO>> searchMovies(@RequestParam @Size(min = 2) String title) {
+    List<Movie> movies = movieService.findAllMoviesContaining(title);
+    return ResponseEntity.ok(MovieMapper.toMovieDTOList(movies));
   }
 }
